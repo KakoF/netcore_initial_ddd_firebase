@@ -62,14 +62,3 @@ DENTRO DE SRC...
 
 * dotnet sln add Api.Service
 (Após criar o projeto, precisa-se adicionar a api na solution)
-
-
-
-
-
-------------------------------------------------------------------------------------------------------------
-
-No Domain, as entidades que são uma representação das tabelas do banco de dados
-
-No Data, vai ficar resposável pela conexão e ela vai usar as entidades setadas em dominio, então preciso apontar Domain dentro de Data:
-* dotnet add .\Api.Data\ reference .\Api.Domain\
