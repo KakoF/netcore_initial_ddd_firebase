@@ -6,6 +6,8 @@ using FireSharp;
 using Api.Domain.Interfaces;
 using Api.Data.Context.Interface;
 using System.Text.Json;
+using FireSharp.Response;
+using Newtonsoft.Json.Linq;
 
 namespace Api.Data.Repositories
 {
@@ -16,9 +18,20 @@ namespace Api.Data.Repositories
         {
             _context = context;
         }
-        public Task<bool> DeleteAsync(Guid id)
+        
+        public async Task<bool> DeleteAsync(string id)
         {
-            throw new NotImplementedException();
+            try
+            {
+            var client = _context.Init();
+            var response = await client.DeleteAsync($"/Usuarios/{id}");
+            return true;
+            }
+            catch (Exception e)
+            {
+                
+                throw e;
+            }
         }
 
         public async Task<IEnumerable<UserEntity>> GetAllAsync()
@@ -27,29 +40,60 @@ namespace Api.Data.Repositories
             {
             var client = _context.Init();
             var response = await client.GetAsync("/Usuarios");
-            var users = JsonSerializer.Deserialize<List<UserEntity>>(response.Body.ToString());
+            var users = JsonSerializer.Deserialize<List<UserEntity>>(response.Body);
             return users;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+          
+        }
+        public async Task<UserEntity> GetAsync(string id)
+        {
+            try
+            {
+            var client = _context.Init();
+            var response = await client.GetAsync($"/Usuarios/{id}");
+            var user = JsonSerializer.Deserialize<UserEntity>(response.Body.ToString());
+            
+            return user;
             }
             catch (Exception e)
             {
                 
                 throw e;
             }
-          
-        }
-        public Task<UserEntity> GetAsync(Guid id)
-        {
-            throw new NotImplementedException();
         }
 
-        public Task<UserEntity> InsertAsync(UserEntity item)
+        public async Task<UserEntity> InsertAsync(UserEntity item)
         {
-            throw new NotImplementedException();
+            try
+            {
+            var client = _context.Init();
+            PushResponse response = await client.PushAsync("/Usuarios", item);
+            item.Id = response.Result.name;
+            return item;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
-        public Task<UserEntity> UpdateAsync(UserEntity item)
+        public async Task<UserEntity> UpdateAsync(string id,UserEntity item)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var client = _context.Init();
+                var response = await client.UpdateAsync($"/Usuarios/{id}", item);
+                var user = JsonSerializer.Deserialize<UserEntity>(response.Body.ToString());
+                return user;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
     }
 }

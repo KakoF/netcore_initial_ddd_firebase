@@ -14,12 +14,12 @@ namespace Api.Service.Service
         {
             _repository = repository;
         }
-        public async Task<bool> Delete(Guid id)
+        public async Task<bool> Delete(string id)
         {
            return await _repository.DeleteAsync(id);
         }
 
-        public async Task<UserEntity> Get(Guid id)
+        public async Task<UserEntity> Get(string id)
         {
             return await _repository.GetAsync(id);
         }
@@ -37,9 +37,9 @@ namespace Api.Service.Service
              return await _repository.InsertAsync(item);
         }
 
-        public async Task<UserEntity> Put(UserEntity item)
+        public async Task<UserEntity> Put(string id, UserEntity item)
         {
-            return await _repository.UpdateAsync(item);
+            return await _repository.UpdateAsync(id, item);
         }
     }
 }
