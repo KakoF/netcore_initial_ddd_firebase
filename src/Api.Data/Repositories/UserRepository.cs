@@ -11,89 +11,105 @@ using Newtonsoft.Json.Linq;
 
 namespace Api.Data.Repositories
 {
-    public class UserRepository : IUserRepository
+  public class UserRepository : IUserRepository
+  {
+    private readonly IFirebaseConnection _context;
+    public UserRepository(IFirebaseConnection context)
     {
-        private readonly IFirebaseConnection _context;
-        public UserRepository(IFirebaseConnection context)
-        {
-            _context = context;
-        }
-        
-        public async Task<bool> DeleteAsync(string id)
-        {
-            try
-            {
-            var client = _context.Init();
-            var response = await client.DeleteAsync($"/Usuarios/{id}");
-            return true;
-            }
-            catch (Exception e)
-            {
-                
-                throw e;
-            }
-        }
-
-        public async Task<IEnumerable<UserEntity>> GetAllAsync()
-        {
-            try
-            {
-            var client = _context.Init();
-            var response = await client.GetAsync("/Usuarios");
-            var users = JsonSerializer.Deserialize<List<UserEntity>>(response.Body);
-            return users;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-          
-        }
-        public async Task<UserEntity> GetAsync(string id)
-        {
-            try
-            {
-            var client = _context.Init();
-            var response = await client.GetAsync($"/Usuarios/{id}");
-            var user = JsonSerializer.Deserialize<UserEntity>(response.Body.ToString());
-            
-            return user;
-            }
-            catch (Exception e)
-            {
-                
-                throw e;
-            }
-        }
-
-        public async Task<UserEntity> InsertAsync(UserEntity item)
-        {
-            try
-            {
-            var client = _context.Init();
-            PushResponse response = await client.PushAsync("/Usuarios", item);
-            item.Id = response.Result.name;
-            return item;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-
-        public async Task<UserEntity> UpdateAsync(string id,UserEntity item)
-        {
-            try
-            {
-                var client = _context.Init();
-                var response = await client.UpdateAsync($"/Usuarios/{id}", item);
-                var user = JsonSerializer.Deserialize<UserEntity>(response.Body.ToString());
-                return user;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
+      _context = context;
     }
+
+    public async Task<bool> DeleteAsync(string id)
+    {
+      try
+      {
+        var client = _context.Init();
+        var response = await client.DeleteAsync($"/Usuarios/{id}");
+        return true;
+      }
+      catch (Exception e)
+      {
+
+        throw e;
+      }
+    }
+
+    public async Task<IEnumerable<UserEntity>> GetAllAsync()
+    {
+      try
+      {
+        var client = _context.Init();
+        var response = await client.GetAsync("/Usuarios");
+        var rawResult = response.ResultAs<Dictionary<string, UserEntity>>();
+        var users = new List<UserEntity>();
+        ConvertFirebaseResult(rawResult, users);
+        return users;
+      }
+      catch (Exception e)
+      {
+        throw e;
+      }
+
+    }
+
+    private void ConvertFirebaseResult(Dictionary<string, UserEntity> rawResult, List<UserEntity> users)
+    {
+      foreach (var user in rawResult)
+      {
+        users.Add(new UserEntity
+        {
+          Id = user.Key,
+          Nome = user.Value.Nome,
+          Email = user.Value.Email,
+        });
+      }
+    }
+
+    public async Task<UserEntity> GetAsync(string id)
+    {
+      try
+      {
+        var client = _context.Init();
+        var response = await client.GetAsync($"/Usuarios/{id}");
+        var user = JsonSerializer.Deserialize<UserEntity>(response.Body.ToString());
+
+        return user;
+      }
+      catch (Exception e)
+      {
+
+        throw e;
+      }
+    }
+
+    public async Task<UserEntity> InsertAsync(UserEntity item)
+    {
+      try
+      {
+        var client = _context.Init();
+        PushResponse response = await client.PushAsync("/Usuarios", item);
+        item.Id = response.Result.name;
+        return item;
+      }
+      catch (Exception e)
+      {
+        throw e;
+      }
+    }
+
+    public async Task<UserEntity> UpdateAsync(string id, UserEntity item)
+    {
+      try
+      {
+        var client = _context.Init();
+        var response = await client.UpdateAsync($"/Usuarios/{id}", item);
+        var user = JsonSerializer.Deserialize<UserEntity>(response.Body.ToString());
+        return user;
+      }
+      catch (Exception e)
+      {
+        throw e;
+      }
+    }
+  }
 }
